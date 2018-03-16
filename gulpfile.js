@@ -10,12 +10,19 @@ var notify = require('gulp-notify');
 var include = require("gulp-include");
 var browserSync = require('browser-sync').create();
 var autoprefixer = require('gulp-autoprefixer');
+var bourbon = require('bourbon').includePaths;
 
 var plumberErrorHandler = { errorHandler: notify.onError({
     title: 'Gulp',
     message: 'Error: <%= error.message %>'
   })
 };
+
+// Dependencies
+var deps = {
+  foundation: './node_modules/foundation-sites/scss',
+  motionUI: './node_modules/motion-ui/src'
+}
 
 
 // Set source paths
@@ -48,9 +55,13 @@ gulp.task('sass', function () {
     return gulp.src(src.sass)
      .pipe(sass({
         includePaths: [
-        ],
-        outputStyle: 'compressed'
-    }))
+              deps.foundation,
+              bourbon,
+              deps.motionUI
+            ],
+        outputStyle: 'compressed',
+        errLogToConsole: true
+    }).on('error', sass.logError))
     .pipe(autoprefixer({
 			browsers: ['last 2 versions'],
 			cascade: false
@@ -93,11 +104,11 @@ gulp.task('watch', function() {
 gulp.task('serve', ['js','sass','img'], function () {
     // Serve files from the root of this project
     browserSync.init({
-		//server: {
-          //  baseDir: "al",
-        //},
-		port:8888,
-        //proxy: "localhost:8888/personal",
+		proxy: 'localhost:8081',
+        port: 8080,
+        ui: {
+            port: 8082
+        },
 		reloadDelay: 1000,
         reloadDebounce: 500
     });
